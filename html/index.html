@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto+Condensed" />
         <link type="text/css" rel="stylesheet" href="/css/reset.css" />
+        <link type="text/css" rel="stylesheet" href="/css/jquery-ui-1.10.0.custom.min.css" />
         <link type="text/css" rel="stylesheet" href="/css/core.css" />
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.10.0.custom.min.js"></script>
+        <script type="text/javascript" src="/js/loading.js"></script>
+        <script type="text/javascript" src="/js/settings.js"></script>
         <script type="text/javascript" src="/js/core.js"></script>
     </head>
     <body>
         <h1>PiCam!</h1>
         <section id="camera-info">
+        <div class="content-region"/>
         </section>
         <section id="app-chooser">
+        <div class="content-region"/>
         </section>
         <section id="app-content">
+        <div class="content-region"/>
         </section>
         <script type="text/javascript">
-            $('#camera-info').core('loadCameraInfo');
+            $('#camera-info').core();
         </script>
     </body>
 </html>

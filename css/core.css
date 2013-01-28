@@ -1,0 +1,57 @@
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: black;
+}
+body h1 {
+    display: none;
+}
+
+#camera-info {
+    float: left;
+    height: 2em;
+    overflow: hidden;
+    width: 60%;
+    background: #ddd;
+    border-bottom: 2px dashed #999;
+    color: #ddd;
+    background-image: url('/image/usb.svg');
+    background-repeat: no-repeat;
+    background-size: 4em 1.8em;
+}
+
+#camera-info .content-region {
+    margin-top: 0.4em;
+    margin-left: 6em;
+    color: white;
+}
+
+#app-chooser .content-region {
+    margin-right: 2em;
+    font-size: small;
+    color: white;
+}
+
+#app-chooser {
+    text-align: right;
+    overflow: hidden;
+    float: right;
+    height: 2em;
+    width: 40%;
+    background: #ddd;
+    border-bottom: 2px dashed #999;
+    color: #ddd;
+}
+
+
+#app-content .content-region {
+    color: white;
+    position: absolute; 
+    top; 2em; 
+    margin-top: 4em;
+    left: 0em; 
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 8em;
+}
+
