@@ -24,7 +24,7 @@ class GPhoto2():
             if line[0] == '/':
                 if setting:
                     result.append(setting)
-                setting = { 'path' : line.strip().replace('/', '-') }
+                setting = { 'path' : line.strip().replace('/', '_') }
             elif len(keyvalue) > 1:
                 key = keyvalue[0].strip()
                 value = keyvalue[1].strip()
@@ -42,7 +42,7 @@ class GPhoto2():
 
     def getCameraSetting(self, path):
         setting = { 'path' : path }
-        path = path.replace('-', '/')
+        path = path.replace('_', '/')
         output = subprocess.check_output(["gphoto2", "--get-config", path])
 
         for line in output.split('\n')[:-1]:
@@ -62,7 +62,7 @@ class GPhoto2():
 
     def setCameraSetting(self, path, value):
         setting = { 'path' : path }
-        path = path.replace('-', '/')
+        path = path.replace('_', '/')
         output = subprocess.check_output(["gphoto2", "--set-config", path + '=' + value])
     
         return True

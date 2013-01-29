@@ -52,6 +52,29 @@ body h1 {
     width: 80%;
     margin-left: 10%;
     margin-right: 10%;
-    height: 8em;
+    min-height: 8em;
 }
 
+#app-content .content-region fieldset {
+    border: 1px solid black;
+    padding: 1em;
+}
+
+#app-content .content-region fieldset label {
+    float: left;
+    clear: left;
+    width: 10em;
+    overflow: hidden;
+    border-top: 1px solid #eee;
+    padding-top: 0.5em;
+    margin-top: 1em;
+}
+
+#app-content .content-region fieldset span.input {
+    float: left;
+    min-width: 10em;
+    border-top: 1px solid #eee;
+    padding-top: 0.5em;
+    margin-top: 1em;
+}
+}
