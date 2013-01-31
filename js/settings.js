@@ -3,7 +3,7 @@
     var methods = {
         init : function( ) {
             me = this;
-            this.loading();
+            $('#app-content .content-region').loading();
             var request = $.ajax( {
                 type: 'GET',
                 dataType:  'json',
@@ -150,10 +150,10 @@
             }
             settingsSource += '</div>';
                 
-            me.html(settingsSource);
+            $('#app-content .content-region').html(settingsSource);
             eval(postCreateJS);
-            me.tabs();
-            me.show('fade', 200);
+            $('#app-content .content-region').tabs();
+            $('#app-content .content-region').show('fade', 200);
         },
 
         insertNodeInTree: function( node, tree ) {
@@ -178,9 +178,7 @@
         },
 
         destroy : function( ) {
-            $('#app-content .content-region').hide('fade', 200, function() {
-                $node.html('');
-            });
+            console.log('destroy');
         }
     };
 
