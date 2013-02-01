@@ -1,32 +1,61 @@
 #!/usr/bin/python
 
-from bottle import get, route, run, static_file
+from bottle import get, post, put, route, run, static_file
 import simplejson as json
 import gphoto2
+import settings
 
 @get('/rest/cameras')
 def list_cameras():
-     g = gphoto2.GPhoto2()   
+    g = gphoto2.GPhoto2()   
 
-     result = g.listCameras()
+    result = g.listCameras()
 
-     return json.dumps(result, indent=4)
+    return json.dumps(result, indent=4)
 
 @get('/rest/settings')
 def list_camera_settings():
-     g = gphoto2.GPhoto2()   
+    g = gphoto2.GPhoto2()   
 
-     result = g.listCameraSettings()
+    result = g.listCameraSettings()
 
-     return json.dumps(result, indent=4)
+    return json.dumps(result, indent=4)
+
+@get('/rest/setting-options')
+def list_setting_options():
+    s = settings.SettingOptions() 
+
+    result = s.list()
+
+    return json.dumps(result, indent=4)
+
+@post('/rest/setting-options/<path>')
+@put('/rest/setting-options/<path>')
+def set_setting_option(path):
+    s = settings.SettingOptions() 
+
+    setting = json.loads(request.body)
+
+    result = s.set(path, setting)
+
+    return json.dumps(setting, indent=4)
+
+@get('/rest/setting-options/<path>')
+def get_setting_option(path):
+    s = settings.SettingOptions() 
+
+    result = s.get(path)
+
+    return json.dumps(result, indent=4)
+
 
 @get('/rest/setting/<path>')
 def get_camera_setting(path):
-     g = gphoto2.GPhoto2()   
+    g = gphoto2.GPhoto2()   
 
-     result = g.getCameraSetting(path)
+    result = g.getCameraSetting(path)
 
-     return json.dumps(result, indent=4)
+    return json.dumps(result, indent=4)
 
 @route('/')
 def default():
