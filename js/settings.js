@@ -58,8 +58,74 @@
                 }
             }
             // All menus loaded
+            methods.loadSettingOptions();
+        },
 
-            $('body').trigger('settingsLoaded'); 
+        loadSettingOptions: function() {
+            var request = $.ajax( {
+                type: 'GET',
+                dataType: 'json',
+                url: '/rest/setting-options'
+            });
+            request.done(function (response) {
+
+                for (key in response) {
+                    settingoption = response[key];
+                    methods.updateSettingOptions(settingoption.path, settingoption.locked, settingoption.hidden);
+                }
+                $('body').trigger('settingsLoaded'); 
+            });
+            return false;
+        },
+
+        lockSetting: function(path) {
+            console.log('Lock: ' + path);
+            $('#' + path).disable();
+        },
+        
+        hideSetting: function(path) {
+            console.log('Hide: ' + path);
+            $('.' + path).hide('fade', 200);
+        },
+        
+        saveSettingOptions: function(path) {
+            var data = $('body').data('core');
+
+            for (menu in data.settings.main.children) {
+                child = data.settings.main.children[menu];
+                for (settingkey in child.children) {
+                    setting = child.children[settingkey];
+                    if (setting.path == path) {
+                        var request = $.ajax( {
+                            type: 'POST',
+                            dataType:  'json',
+                            url: '/rest/setting-option/' + setting.path,
+                            data: setting
+                        });
+                    }
+                }
+            }
+
+        },
+
+        updateSettingOptions: function(path, locked, hidden) {
+            var data = $('body').data('core');
+
+            for (menu in data.settings.main.children) {
+                child = data.settings.main.children[menu];
+                for (settingkey in child.children) {
+                    setting = child.children[settingkey];
+                    if (setting.path == path) {
+                        if (locked != null) {
+                            setting.locked = locked;
+                        } 
+                        if (hidden != null) {
+                            setting.hidden = hidden;
+                        }
+                    }
+                }
+            }
+
         },
 
         settingsLoaded: function() {
@@ -76,7 +142,6 @@
             $appcontent.loading('destroy');
             settingsSource += '<div id="settings-tabs">';
             settingsSource += '<ul>';
-            console.log(data);
             for (menu in data.settings.main.children) {
                 menu = data.settings.main.children[menu];
                 settingsSource += '<li><a href="#' + menu.path + '">' + menu.Label + '</a></li>';
@@ -143,17 +208,43 @@
                         console.log(setting);
                     }
 
-                    settingsSource += '<label for="' + setting.path + '">' + setting.Label + '</label><span class="input">' + input + '</span>';
+                    settingsSource += '<label for="' + setting.path + '" class="' + setting.path + '">' + setting.Label + '</label><span class="input ' + setting.path + '">' + input + '</span>';
+                    settingsSource += '<span class="input-flags ' + setting.path + '"><button id="lock' + setting.path + '"/><button id="hide' + setting.path + '"/></span>';
+                    postCreateJS += '$("#hide' + setting.path + '").button({' +
+                                    '   icons: {' +
+                                    '       primary: "ui-icon-circle-close"' +
+                                    '   },' +
+                                    '   text: false' +
+                                    '});';
+                    postCreateJS += '$("#lock' + setting.path + '").button({' +
+                                    '   icons: {' +
+                                    '       primary: "ui-icon-locked"' +
+                                    '   },' +
+                                    '   text: false' +
+                                    '});';
+                    postCreateJS += '$("#hide' + setting.path + '").on("click", methods.onClickHide);';
+                    if (setting.hidden) {
+                        postCreateJS += 'methods.hideSetting("' + setting.path + '");';
+                    }
                 }
                 settingsSource += '</div>';
                 settingsSource += '</fieldset>';
             }
+            settingsSource += '<button id="show-hidden">Show hidden settings</button>';
             settingsSource += '</div>';
                 
             $('#app-content .content-region').html(settingsSource);
             eval(postCreateJS);
             $('#app-content .content-region').tabs();
             $('#app-content .content-region').show('fade', 200);
+        },
+
+        onClickHide: function(e) {
+            target = e.currentTarget;
+            id = $(target).attr('id').replace('hide', '');
+            methods.updateSettingOptions(id, null, true);
+            methods.hideSetting(id);
+            methods.saveSettingOptions(id);
         },
 
         insertNodeInTree: function( node, tree ) {

@@ -44,29 +44,34 @@ class GPhoto2():
 
     def getSettingFromCache(self, path):
         filepath = 'cache/settings/' + path.replace('/', '_')
-        if not os.access(filepath, os.F_OK):
-            return False
 
-        f = open(filepath, 'r')
-        jsonstr = f.read()
-        f.close()
+        try:
+            f = open(filepath, 'r')
+            jsonstr = f.read()
+            f.close()
+        except IOError:
+            return False
         setting = json.loads(jsonstr)
         return setting
 
     def cacheSetting(self, setting):
         path = setting['path']
         filepath = 'cache/settings/' + path.replace('/', '_')
-        if os.access(filepath, os.F_OK):
+
+        try:
+            os.makedirs('cache/settings')
+        except IOError as e:
+            pass
+
+        try:
+            f = open(filepath, 'w')
+            jsonstr = json.dumps(setting)
+            f.write(jsonstr)
+            f.close()
+        except IOError:
             return False
 
-        if not os.access('cache/settings', os.F_OK):
-            os.makedirs('cache/settings')
-        f = open(filepath, 'w')
-        jsonstr = json.dumps(setting)
-        print(jsonstr)
-        f.write(jsonstr)
-        f.close()
-        return setting
+        return True
 
     def getCameraSetting(self, path):
         setting = self.getSettingFromCache(path)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from bottle import get, post, put, route, run, static_file
+from bottle import get, post, put, route, run, static_file, request
 import simplejson as json
 import gphoto2
 import settings
@@ -29,18 +29,22 @@ def list_setting_options():
 
     return json.dumps(result, indent=4)
 
-@post('/rest/setting-options/<path>')
-@put('/rest/setting-options/<path>')
+@post('/rest/setting-option/<path>')
+@put('/rest/setting-option/<path>')
 def set_setting_option(path):
     s = settings.SettingOptions() 
 
-    setting = json.loads(request.body)
+    setting = {}
+    for k in request.POST:
+        setting[k] = request.POST.get(k)
 
-    result = s.set(path, setting)
+    setting['path'] = path;
+
+    result = s.set(setting)
 
     return json.dumps(setting, indent=4)
 
-@get('/rest/setting-options/<path>')
+@get('/rest/setting-option/<path>')
 def get_setting_option(path):
     s = settings.SettingOptions() 
 

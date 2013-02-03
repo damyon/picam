@@ -9,34 +9,39 @@ class SettingOptions():
     def list(self):
         filepath = 'settings'
         settings = []
-        for filename in os.listdir(filepath):
-            f = open(filepath + '/' + filename, 'r')
-            settingstr = f.read()
-            f.close()
-            setting = json.loads(settingstr)
-            settings.push(setting)
+        try: 
+            for filename in os.listdir(filepath):
+                f = open(filepath + '/' + filename, 'r')
+                settingstr = f.read()
+                f.close()
+                setting = json.loads(settingstr)
+                settings.append(setting)
+        except OSError:
+            pass
 
         return settings
 
     def get(self, settingname):
         path = 'settings/' + settingname
 
-        if not os.access(filepath, os.F_OK):
-            return false 
-
-        f = open(filepath + '/' + filename, 'r')
-        settingstr = f.read()
-        f.close()
+        try:
+            f = open(filepath + '/' + filename, 'r')
+            settingstr = f.read()
+            f.close()
+        except IOError:
+            return False
         setting = json.loads(settingstr)
         return setting
 
     def set(self, setting):
         path = 'settings/' + setting['path']
 
-        if not os.access('settings', os.F_OK):
+        try:
             os.makedirs('settings');
+        except OSError:
+            pass
         
-        f = open(filepath + '/' + filename, 'r')
+        f = open(path, 'w')
         settingstr = f.write(json.dumps(setting))
         f.close()
     
