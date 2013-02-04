@@ -71,7 +71,7 @@
 
                 for (key in response) {
                     settingoption = response[key];
-                    methods.updateSettingOptions(settingoption.path, settingoption.locked, settingoption.hidden);
+                    methods.updateSettingOptions(settingoption.path, settingoption.locked == "true", settingoption.hidden == "true");
                 }
                 $('body').trigger('settingsLoaded'); 
             });
@@ -79,13 +79,55 @@
         },
 
         lockSetting: function(path) {
-            console.log('Lock: ' + path);
-            $('#' + path).disable();
+
+            setting = methods.findSettingInTree(path);
+            if (setting) {
+                if (setting.Type == 'MENU' || 
+                        setting.Type == 'TOGGLE' ||
+                        setting.Type == 'TEXT') {
+                    $('#' + path).attr('disabled', true);
+                } else if (setting.Type == 'RANGE') {
+                    $('#' + path).slider('disable');
+                } else if (setting.Type == 'RADIO') {
+                    $('.radio' + path).attr('disabled', true);
+                }
+            }
+
+
+            $('#lock' + path).hide();
+            $('#unlock' + path).show();
+        },
+        
+        unLockSetting: function(path) {
+            setting = methods.findSettingInTree(path);
+            if (setting) {
+                if (setting.Type == 'MENU' || 
+                        setting.Type == 'TOGGLE' ||
+                        setting.Type == 'TEXT') {
+                    $('#' + path).attr('disabled', false);
+                } else if (setting.Type == 'RANGE') {
+                    $('#' + path).slider('enable');
+                } else if (setting.Type == 'RADIO') {
+                    $('.radio' + path).attr('disabled', false);
+                }
+            }
+            $('#' + path).attr('disabled', false);
+            $('#lock' + path).show();
+            $('#unlock' + path).hide();
         },
         
         hideSetting: function(path) {
-            console.log('Hide: ' + path);
+            $('.' + path).addClass('setting-hidden');
             $('.' + path).hide('fade', 200);
+            $('#hide' + path).hide();
+            $('#show' + path).show();
+        },
+        
+        showSetting: function(path) {
+            $('.' + path).removeClass('setting-hidden');
+            $('.' + path).show('fade', 200);
+            $('#hide' + path).show();
+            $('#show' + path).hide();
         },
         
         saveSettingOptions: function(path) {
@@ -100,7 +142,7 @@
                             type: 'POST',
                             dataType:  'json',
                             url: '/rest/setting-option/' + setting.path,
-                            data: setting
+                            data: { locked: setting.locked, hidden: setting.hidden }
                         });
                     }
                 }
@@ -108,7 +150,7 @@
 
         },
 
-        updateSettingOptions: function(path, locked, hidden) {
+        findSettingInTree: function(path) {
             var data = $('body').data('core');
 
             for (menu in data.settings.main.children) {
@@ -116,16 +158,26 @@
                 for (settingkey in child.children) {
                     setting = child.children[settingkey];
                     if (setting.path == path) {
-                        if (locked != null) {
-                            setting.locked = locked;
-                        } 
-                        if (hidden != null) {
-                            setting.hidden = hidden;
-                        }
+                        return setting;
                     }
                 }
             }
+            return false;
+        },
 
+        updateSettingOptions: function(path, locked, hidden) {
+            var setting = methods.findSettingInTree(path);
+
+            if (setting) {
+                if (locked != null) {
+                    setting.locked = locked;
+                } 
+                if (hidden != null) {
+                    setting.hidden = hidden;
+                }
+                return true;
+            }
+            return false;
         },
 
         settingsLoaded: function() {
@@ -198,7 +250,7 @@
                             if (setting.Current == namevalue) {
                                 selected = ' checked="checked"';
                             }
-                            input += '<input type="radio" name="' + setting.path + '" value="' + namevalue + '" ' + selected + ' class="jquery-ui-widget"/>' + namevalue + '<br/>';
+                            input += '<input type="radio" class="radio' + setting.path + '" name="' + setting.path + '" value="' + namevalue + '" ' + selected + ' class="jquery-ui-widget"/>' + namevalue + '<br/>';
                         }
                     } else if (setting.Type == 'TEXT') {
                         input += '<input type="text" id="' + setting.path + '" value="' + setting.Current + '" class="jquery-ui-widget"/>';
@@ -209,32 +261,66 @@
                     }
 
                     settingsSource += '<label for="' + setting.path + '" class="' + setting.path + '">' + setting.Label + '</label><span class="input ' + setting.path + '">' + input + '</span>';
-                    settingsSource += '<span class="input-flags ' + setting.path + '"><button id="lock' + setting.path + '"/><button id="hide' + setting.path + '"/></span>';
+                    settingsSource += '<span class="input-flags ' + setting.path + '"><button id="lock' + setting.path + '"/><button id="unlock' + setting.path + '"/><button id="hide' + setting.path + '"/><button id="show' + setting.path + '"/></span>';
                     postCreateJS += '$("#hide' + setting.path + '").button({' +
                                     '   icons: {' +
-                                    '       primary: "ui-icon-circle-close"' +
+                                    '       primary: "ui-icon-circle-minus"' +
+                                    '   },' +
+                                    '   text: false' +
+                                    '});';
+                    postCreateJS += '$("#show' + setting.path + '").button({' +
+                                    '   icons: {' +
+                                    '       primary: "ui-icon-circle-plus"' +
                                     '   },' +
                                     '   text: false' +
                                     '});';
                     postCreateJS += '$("#lock' + setting.path + '").button({' +
+                                    '   icons: {' +
+                                    '       primary: "ui-icon-unlocked"' +
+                                    '   },' +
+                                    '   text: false' +
+                                    '});';
+                    postCreateJS += '$("#unlock' + setting.path + '").button({' +
                                     '   icons: {' +
                                     '       primary: "ui-icon-locked"' +
                                     '   },' +
                                     '   text: false' +
                                     '});';
                     postCreateJS += '$("#hide' + setting.path + '").on("click", methods.onClickHide);';
+                    postCreateJS += '$("#show' + setting.path + '").on("click", methods.onClickShow);';
+                    postCreateJS += '$("#lock' + setting.path + '").on("click", methods.onClickLock);';
+                    postCreateJS += '$("#unlock' + setting.path + '").on("click", methods.onClickUnLock);';
                     if (setting.hidden) {
                         postCreateJS += 'methods.hideSetting("' + setting.path + '");';
+                    } else {
+                        postCreateJS += 'methods.showSetting("' + setting.path + '");';
+                    }
+                    if (setting.locked) {
+                        postCreateJS += 'methods.lockSetting("' + setting.path + '");';
+                    } else {
+                        postCreateJS += 'methods.unLockSetting("' + setting.path + '");';
                     }
                 }
                 settingsSource += '</div>';
                 settingsSource += '</fieldset>';
             }
             settingsSource += '<button id="show-hidden">Show hidden settings</button>';
+            settingsSource += '<button id="hide-hidden">Hide hidden settings</button>';
             settingsSource += '</div>';
                 
             $('#app-content .content-region').html(settingsSource);
+            $('#hide-hidden').hide();
             eval(postCreateJS);
+            $('#show-hidden').button().on('click', function () {
+                $('.setting-hidden').show('fade', 200);
+                $('#show-hidden').hide();
+                $('#hide-hidden').show();
+            });
+            $('#hide-hidden').button().on('click', function () {
+                $('.setting-hidden').hide('fade', 200);
+                $('#hide-hidden').hide();
+                $('#show-hidden').show();
+            });
             $('#app-content .content-region').tabs();
             $('#app-content .content-region').show('fade', 200);
         },
@@ -244,6 +330,30 @@
             id = $(target).attr('id').replace('hide', '');
             methods.updateSettingOptions(id, null, true);
             methods.hideSetting(id);
+            methods.saveSettingOptions(id);
+        },
+        
+        onClickLock: function(e) {
+            target = e.currentTarget;
+            id = $(target).attr('id').replace('lock', '');
+            methods.updateSettingOptions(id, true, null);
+            methods.lockSetting(id);
+            methods.saveSettingOptions(id);
+        },
+        
+        onClickUnLock: function(e) {
+            target = e.currentTarget;
+            id = $(target).attr('id').replace('unlock', '');
+            methods.updateSettingOptions(id, false, null);
+            methods.unLockSetting(id);
+            methods.saveSettingOptions(id);
+        },
+        
+        onClickShow: function(e) {
+            target = e.currentTarget;
+            id = $(target).attr('id').replace('show', '');
+            methods.updateSettingOptions(id, null, false);
+            methods.showSetting(id);
             methods.saveSettingOptions(id);
         },
 

@@ -91,7 +91,15 @@ body h1 {
     height: 1.6em;
 }
 
+.setting-hidden {
+    color: #ddd;
+}
+
 #show-hidden {
+    float: right;
+}
+
+#hide-hidden {
     float: right;
 }
 
