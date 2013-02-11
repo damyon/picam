@@ -52,6 +52,15 @@ def get_setting_option(path):
 
     return json.dumps(result, indent=4)
 
+@post('/rest/setting/<path>')
+@put('/rest/setting/<path>')
+def set_setting_option(path):
+    g = gphoto2.GPhoto2() 
+    value = request.POST['value']
+
+    result = g.setCameraSetting(path, value)
+
+    return json.dumps(result, indent=4)
 
 @get('/rest/setting/<path>')
 def get_camera_setting(path):

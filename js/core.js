@@ -37,6 +37,11 @@
                 $('#app-content').html('<div class="content-region"></div>');
                 $('#app-content .content-region').settings();
             });
+            $('#shoot-button').on('click', function() {
+                $('#app-content .content-region').remove();
+                $('#app-content').html('<div class="content-region"></div>');
+                $('#app-content .content-region').shoot();
+            });
             return this;
         },
 

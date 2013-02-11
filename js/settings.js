@@ -71,11 +71,27 @@
 
                 for (key in response) {
                     settingoption = response[key];
-                    methods.updateSettingOptions(settingoption.path, settingoption.locked == "true", settingoption.hidden == "true");
+                    methods.updateSettingOptions(settingoption.path, 
+                                                 settingoption.locked == "true",
+                                                 settingoption.hidden == "true",
+                                                 settingoption.quickShoot == "true");
                 }
                 $('body').trigger('settingsLoaded'); 
             });
             return false;
+        },
+        
+        toggleQuickShootSetting: function(path) {
+            var $node =  $('#quickshoot' + path);
+
+            if ($node.hasClass('quickshoot')) {
+                console.log('Remove class');
+                $node.removeClass('quickshoot');
+            } else {
+                console.log('Add class');
+                console.log($node);
+                $node.addClass('quickshoot');
+            }
         },
 
         lockSetting: function(path) {
@@ -84,12 +100,11 @@
             if (setting) {
                 if (setting.Type == 'MENU' || 
                         setting.Type == 'TOGGLE' ||
-                        setting.Type == 'TEXT') {
+                        setting.Type == 'TEXT' ||
+                        setting.Type == 'RADIO') {
                     $('#' + path).attr('disabled', true);
                 } else if (setting.Type == 'RANGE') {
                     $('#' + path).slider('disable');
-                } else if (setting.Type == 'RADIO') {
-                    $('.radio' + path).attr('disabled', true);
                 }
             }
 
@@ -103,12 +118,11 @@
             if (setting) {
                 if (setting.Type == 'MENU' || 
                         setting.Type == 'TOGGLE' ||
-                        setting.Type == 'TEXT') {
+                        setting.Type == 'TEXT' ||
+                        setting.Type == 'RADIO') {
                     $('#' + path).attr('disabled', false);
                 } else if (setting.Type == 'RANGE') {
                     $('#' + path).slider('enable');
-                } else if (setting.Type == 'RADIO') {
-                    $('.radio' + path).attr('disabled', false);
                 }
             }
             $('#' + path).attr('disabled', false);
@@ -142,7 +156,7 @@
                             type: 'POST',
                             dataType:  'json',
                             url: '/rest/setting-option/' + setting.path,
-                            data: { locked: setting.locked, hidden: setting.hidden }
+                            data: { locked: setting.locked, hidden: setting.hidden, quickShoot: setting.quickShoot }
                         });
                     }
                 }
@@ -164,8 +178,48 @@
             }
             return false;
         },
+        
+        saveSetting: function(path, value) {
+            var request = $.ajax( {
+                type: 'POST',
+                dataType:  'json',
+                url: '/rest/setting/' + setting.path,
+                data: { value: value }
+            });
+            request.done(function(response) {
+                var saved = false;
+                $('#loading' + path).loading('destroy');
+                setting = methods.findSettingInTree(path);
 
-        updateSettingOptions: function(path, locked, hidden) {
+                if (response) {
+                    setting.current = value;
+                    saved = true;
+                } else {
+                    if (setting.Type == 'TOGGLE') {
+                        $('#' + path).attr('checked', setting.Current);        
+                    } else {
+                        $('#' + path).val(setting.Current);        
+                    }
+                }
+                if (setting.Type == 'MENU' || 
+                        setting.Type == 'TOGGLE' ||
+                        setting.Type == 'TEXT' ||
+                        setting.Type == 'RADIO') {
+                    $('#' + path).attr('disabled', false);
+                } else if (setting.Type == 'RANGE') {
+                    $('#' + path).slider('enable');
+                }
+
+                if (!saved) {
+                    console.log('Failed to save setting value: ' + path);
+                    methods.lockSetting(path);
+                    methods.saveSettingOptions(path);
+                }
+            });
+
+        },
+
+        updateSettingOptions: function(path, locked, hidden, quickShoot) {
             var setting = methods.findSettingInTree(path);
 
             if (setting) {
@@ -175,9 +229,36 @@
                 if (hidden != null) {
                     setting.hidden = hidden;
                 }
+                if (quickShoot != null) {
+                    setting.quickShoot = quickShoot;
+                }
                 return true;
             }
             return false;
+        },
+        
+        changeCameraSetting: function() {
+            console.log(this);
+            id = $(this).attr('id');
+            $('#loading' + id).loading();
+            setting = methods.findSettingInTree(id);
+            if (setting) {
+                if (setting.Type == 'MENU' || 
+                        setting.Type == 'TOGGLE' ||
+                        setting.Type == 'TEXT' ||
+                        setting.Type == 'RADIO') {
+                    $('#' + id).attr('disabled', true);
+                } else if (setting.Type == 'RANGE') {
+                    $('#' + id).slider('disable');
+                }
+            }
+            value = $(this).val();
+
+            if ($(this).attr('type') == 'checkbox') {
+                value = $(this).is(':checked');
+            }
+
+            methods.saveSetting(id, value);
         },
 
         settingsLoaded: function() {
@@ -226,20 +307,27 @@
                         }
                         
                         input += '</select>';
+                        input += '<span id="loading' + setting.path + '"/>';
+                        postCreateJS += '$("#' + setting.path + '").change(methods.changeCameraSetting);';
                     } else if (setting.Type == 'TOGGLE') {
                         selected = '';
                         if (setting.Current) {
                             selected = 'checked="checked"';
                         }
                         input += '<input type="checkbox" value="1" id="' + setting.path + '" ' + selected + ' class="jquery-ui-widget"/>';
+                        input += '<span id="loading' + setting.path + '"/>';
+                        postCreateJS += '$("#' + setting.path + '").change(methods.changeCameraSetting);';
 
                     } else if (setting.Type == 'RANGE') {
                         input += '<div id="' + setting.path + '" style="width: 16em;"></div>';
+                        input += '<span id="loading' + setting.path + '"/>';
                         postCreateJS += '$("#' + setting.path + '").slider({ min: ' + setting.Bottom + ', max: ' + setting.Top + ', step: ' + setting.Step + ', value: ' + setting.Current + '});\n';
+                        postCreateJS += '$("#' + setting.path + '").change(methods.changeCameraSetting);';
                     } else if (setting.Type == 'RADIO') {
                         if (!('Choice' in setting)) {
                             continue;
                         }
+                        input += '<select id="' + setting.path + '" class="jquery-ui-widget">';
                         for (i = 0; i < setting.Choice.length; i++) {
                             choice = setting.Choice[i];
 
@@ -248,12 +336,17 @@
                             namevalue = namevalue.join(' ');
                             selected = '';
                             if (setting.Current == namevalue) {
-                                selected = ' checked="checked"';
+                                selected = ' selected="selected"';
                             }
-                            input += '<input type="radio" class="radio' + setting.path + '" name="' + setting.path + '" value="' + namevalue + '" ' + selected + ' class="jquery-ui-widget"/>' + namevalue + '<br/>';
+                            input += '<option value="' + namevalue + '"' + selected + '>' + namevalue + '</option>';
                         }
+                        input += '</select>';
+                        input += '<span id="loading' + setting.path + '"/>';
+                        postCreateJS += '$("#' + setting.path + '").change(methods.changeCameraSetting);';
                     } else if (setting.Type == 'TEXT') {
                         input += '<input type="text" id="' + setting.path + '" value="' + setting.Current + '" class="jquery-ui-widget"/>';
+                        input += '<span id="loading' + setting.path + '"/>';
+                        postCreateJS += '$("#' + setting.path + '").change(methods.changeCameraSetting);';
                     } else if (setting.Type == 'DATE') {
                         input += '<span id="' + setting.path + '">' + setting.Printable + '</span>';
                     } else {
@@ -261,7 +354,7 @@
                     }
 
                     settingsSource += '<label for="' + setting.path + '" class="' + setting.path + '">' + setting.Label + '</label><span class="input ' + setting.path + '">' + input + '</span>';
-                    settingsSource += '<span class="input-flags ' + setting.path + '"><button id="lock' + setting.path + '"/><button id="unlock' + setting.path + '"/><button id="hide' + setting.path + '"/><button id="show' + setting.path + '"/></span>';
+                    settingsSource += '<span class="input-flags ' + setting.path + '"><button id="quickshoot' + setting.path + '"/><button id="lock' + setting.path + '"/><button id="unlock' + setting.path + '"/><button id="hide' + setting.path + '"/><button id="show' + setting.path + '"/></span>';
                     postCreateJS += '$("#hide' + setting.path + '").button({' +
                                     '   icons: {' +
                                     '       primary: "ui-icon-circle-minus"' +
@@ -286,10 +379,17 @@
                                     '   },' +
                                     '   text: false' +
                                     '});';
+                    postCreateJS += '$("#quickshoot' + setting.path + '").button({' +
+                                    '   icons: {' +
+                                    '       primary: "ui-icon-star"' +
+                                    '   },' +
+                                    '   text: false' +
+                                    '});';
                     postCreateJS += '$("#hide' + setting.path + '").on("click", methods.onClickHide);';
                     postCreateJS += '$("#show' + setting.path + '").on("click", methods.onClickShow);';
                     postCreateJS += '$("#lock' + setting.path + '").on("click", methods.onClickLock);';
                     postCreateJS += '$("#unlock' + setting.path + '").on("click", methods.onClickUnLock);';
+                    postCreateJS += '$("#quickshoot' + setting.path + '").on("click", methods.onClickQuickShoot);';
                     if (setting.hidden) {
                         postCreateJS += 'methods.hideSetting("' + setting.path + '");';
                     } else {
@@ -299,6 +399,9 @@
                         postCreateJS += 'methods.lockSetting("' + setting.path + '");';
                     } else {
                         postCreateJS += 'methods.unLockSetting("' + setting.path + '");';
+                    }
+                    if (setting.quickShoot) {
+                        postCreateJS += 'methods.toggleQuickShootSetting("' + setting.path + '");';
                     }
                 }
                 settingsSource += '</div>';
@@ -328,15 +431,23 @@
         onClickHide: function(e) {
             target = e.currentTarget;
             id = $(target).attr('id').replace('hide', '');
-            methods.updateSettingOptions(id, null, true);
+            methods.updateSettingOptions(id, null, true, null);
             methods.hideSetting(id);
+            methods.saveSettingOptions(id);
+        },
+        
+        onClickQuickShoot: function(e) {
+            target = e.currentTarget;
+            id = $(target).attr('id').replace('quickshoot', '');
+            methods.updateSettingOptions(id, null, null, $('#quickshoot' + id).hasClass('quickshoot'));
+            methods.toggleQuickShootSetting(id);
             methods.saveSettingOptions(id);
         },
         
         onClickLock: function(e) {
             target = e.currentTarget;
             id = $(target).attr('id').replace('lock', '');
-            methods.updateSettingOptions(id, true, null);
+            methods.updateSettingOptions(id, true, null, null);
             methods.lockSetting(id);
             methods.saveSettingOptions(id);
         },
@@ -344,7 +455,7 @@
         onClickUnLock: function(e) {
             target = e.currentTarget;
             id = $(target).attr('id').replace('unlock', '');
-            methods.updateSettingOptions(id, false, null);
+            methods.updateSettingOptions(id, false, null, null);
             methods.unLockSetting(id);
             methods.saveSettingOptions(id);
         },
@@ -352,7 +463,7 @@
         onClickShow: function(e) {
             target = e.currentTarget;
             id = $(target).attr('id').replace('show', '');
-            methods.updateSettingOptions(id, null, false);
+            methods.updateSettingOptions(id, null, false, null);
             methods.showSetting(id);
             methods.saveSettingOptions(id);
         },

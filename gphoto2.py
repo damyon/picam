@@ -102,6 +102,12 @@ class GPhoto2():
     def setCameraSetting(self, path, value):
         setting = { 'path' : path }
         path = path.replace('_', '/')
-        output = subprocess.check_output(["gphoto2", "--set-config", path + '=' + value])
-    
-        return True
+        try:
+            print(["gphoto2", "--set-config", path + '=' + value])
+            result = subprocess.check_output(["gphoto2", "--set-config", path + '=' + value], stderr=subprocess.STDOUT)
+            print(result)
+        except subprocess.CalledProcessError as e:
+            print(e)
+            result = ['Error']
+
+        return not 'Error' in result
