@@ -60,7 +60,7 @@ class GPhoto2():
 
         try:
             os.makedirs('cache/settings')
-        except IOError as e:
+        except OSError as e:
             pass
 
         try:
@@ -111,3 +111,99 @@ class GPhoto2():
             result = ['Error']
 
         return not 'Error' in result
+
+    def listFiles(self):
+        output = subprocess.check_output(["gphoto2", "--list-files"])
+        files = []
+
+        lastfolder = '' 
+        for line in output.split('\n')[:-1]:
+            if (line[0] == '#'):
+                infolist = line.split()
+                filename = infolist[1]
+                filesize = infolist[3]
+                
+                files.append({ 'Filename' : filename, 'Filesize' : filesize })
+            else:
+                # It's a folder
+                lastfolder = line.split('\'')[1]
+                
+
+        return files
+    
+    def getThumbnail(self, path):
+        imagename = path.split('/')[-1].split('.')[0] + '.jpg'
+
+        cachepath = 'cache/thumbs/' + imagename
+
+        if os.path.isfile(cachepath):
+            return imagename
+
+        try:
+            os.makedirs('cache/thumbs')
+        except OSError as e:
+            pass
+
+        output = subprocess.check_output(["gphoto2", "--get-all-thumbnails", "--filename=cache/thumbs/%f.jpg"])
+
+        if os.path.isfile(cachepath):
+            return imagename
+
+        return False
+    
+    def getJpeg(self, path):
+        imagename = path.split('/')[-1].split('.')[0] + '.jpg'
+        cameraimagename = path.split('/')[-1].split('.')[0]
+        rawimagename = ''
+
+        files = self.listFiles()
+
+        fileindex = 0
+        for i in range(0, len(files)):
+            print(cameraimagename)
+            print(files[i]['Filename'])
+            if (cameraimagename in files[i]['Filename']):
+                fileindex = i+1
+                rawimagename = files[i]['Filename']
+
+        cachepath = 'cache/jpegs/' + rawimagename
+
+        if os.path.isfile(cachepath):
+            if '.jpg' in rawimagename.lower():
+                return rawimagename
+            else:
+                jpgimagename = rawimagename + '.jpg'
+                if os.path.isfile('cache/jpegs/' + jpgimagename):
+                    return jpgimagename
+
+        try:
+            os.makedirs('cache/jpegs')
+        except OSError as e:
+            pass
+
+        output = subprocess.check_output(["gphoto2", "--get-file", str(fileindex), "--filename=cache/jpegs/" + rawimagename])
+
+        if not os.path.isfile(cachepath):
+            print('File not downloaded')
+            return False
+
+        if '.jpg' in rawimagename.lower():
+            print('File was jpg already')
+            return rawimagename
+
+        # Need a conversion to jpeg
+        jpgimagename = rawimagename + '.jpg'
+
+        output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=cache/jpegs/' + jpgimagename, 'cache/jpegs/' + rawimagename])
+
+        if os.path.isfile('cache/jpegs/' + jpgimagename):
+            return jpgimagename
+
+        print('jpg not created')
+        return False
+        
+    def takePhoto(self):
+        output = subprocess.check_output(["gphoto2", "--capture-image"])
+
+        print(output)
+        return True

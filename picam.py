@@ -13,6 +13,45 @@ def list_cameras():
 
     return json.dumps(result, indent=4)
 
+@post('/rest/photos')
+@put('/rest/photos')
+def take_photo():
+    g = gphoto2.GPhoto2() 
+
+    result = g.takePhoto()
+
+    return json.dumps(result, indent=4)
+
+@get('/rest/jpegs/<path>')
+def get_jpeg(path):
+    g = gphoto2.GPhoto2()   
+
+    result = g.getJpeg(path)
+
+    if result:
+        return static_file(result, root='cache/jpegs')
+    else:
+        return json.dumps(result, indent=4)
+
+@get('/rest/thumbnails/<path>')
+def get_thumbnail(path):
+    g = gphoto2.GPhoto2()   
+
+    result = g.getThumbnail(path)
+
+    if result:
+        return static_file(result, root='cache/thumbs')
+    else:
+        return json.dumps(result, indent=4)
+
+@get('/rest/files')
+def list_files():
+    g = gphoto2.GPhoto2()   
+
+    result = g.listFiles()
+
+    return json.dumps(result, indent=4)
+
 @get('/rest/settings')
 def list_camera_settings():
     g = gphoto2.GPhoto2()   

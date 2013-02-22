@@ -36,23 +36,57 @@
             var $appcontent = $('#app-content .content-region');
             var data = $('body').data('core');
             var source = '';
-            var postCreateJS = '';
 
             $appcontent.loading('destroy');
-            source += '<div id="last-shot-preview">';
-            source += '</div>';
             source += '<div id="shoot-bar">';
-            source += '<button id="shoot"/>';
-            postCreateJS += '$("#shoot").button({' +
-                                    '   icons: {' +
-                                    '       primary: "ui-icon-image"' +
-                                    '   },' +
-                                    '   text: false' +
-                                    '});';
+            source += '<button id="shoot">Take photo</button>';
+            source += '</div>';
+            source += '<div id="last-shot-preview">';
+            source += '<img/>';
             source += '</div>';
             $('#app-content .content-region').html(source);
-            eval(postCreateJS);
             $('#app-content .content-region').show('fade', 200);
+            $('#last-shot-preview img').hide();
+            $("#shoot").button({
+                icons: { primary: "ui-icon-image" }
+            });
+            $('#shoot').click(methods.takePhoto);
+        },
+
+        takePhoto: function() {
+
+            $('#last-shot-preview').loading();
+            var request = $.ajax( {
+                type: 'POST',
+                dataType: 'json',
+                url: '/rest/photos'
+            });
+            request.done(methods.loadLastJpeg);
+        },
+
+        loadLastJpeg: function() {
+            var request = $.ajax( {
+                type: 'GET',
+                dataType: 'json',
+                url: '/rest/files'
+            });
+            request.done(function (response) {
+                var data = $('body').data('core');
+
+                data.photos = response;
+                methods.photosLoaded();
+            });
+            return false;
+        },
+        photosLoaded: function() {
+            var $appcontent = $('#app-content .content-region');
+            var data = $('body').data('core');
+            var image = data.photos.pop();
+            $('#last-shot-preview img').attr('src', '/rest/jpegs/' + image.Filename);
+            $('#last-shot-preview img').show();
+            $('#last-shot-preview img').load(function () {
+                $('#last-shot-preview').loading('destroy');
+            });
         },
         
         destroy : function( ) {
