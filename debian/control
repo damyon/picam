@@ -1,5 +1,4 @@
 Source: picam
-Version: 0.1.20130325
 Section: python
 Priority: extra
 Maintainer: Damyon Wiese <damyon.wiese@gmail.com>
@@ -9,8 +8,6 @@ Homepage: http://www.github.com/damyon/picam
 
 Package: picam
 Architecture: all
-Depends: gphoto2 (>= 2.4.14-1), ufraw-batch (>= 0.18-2)\
-python2.7 (>= 2.7.3-6), python-simplejson (>=2.5.2-1), \
-python-bottle (>= 0.10.11-1)
+Depends: gphoto2 (>= 2.4.14-1), ufraw-batch (>= 0.18-2), python2.7 (>= 2.7.3-6), python-simplejson (>=2.5.2-1), python-bottle (>= 0.10.11-1)
 Description: Python USB camera control web interface
 

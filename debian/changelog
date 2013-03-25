@@ -1,4 +1,5 @@
-picam (0.1) unstable; urgency=low
-    * Initial version
- -- Damyon Wiese <damyon.wiese@gmail.com>  Mon Mar 25 14:39:34 UTC 2013
+picam (0.1.20130325) UNRELEASED; urgency=low
 
+  * Initial release. (Closes: #XXXXXX)
+
+ --  <pi@raspberrypi>  Mon, 25 Mar 2013 14:52:26 +0000
