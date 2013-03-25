@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+case "$1" in
+    configure)
+    ln -s /usr/share/pyshared/picam /usr/lib/python2.7/dist-packages/
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    rm -f /usr/lib/python2.7/dist-packages/picam
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+exit 0

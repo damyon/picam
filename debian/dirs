@@ -1,0 +1,4 @@
+usr/bin/
+usr/share/pyshared/picam/
+/etc/init.d/
+/var/lib/picam/
