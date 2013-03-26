@@ -16,7 +16,7 @@ class SettingOptions():
                 f.close()
                 setting = json.loads(settingstr)
                 settings.append(setting)
-        except IOError:
+        except OSError:
             pass
 
         return settings
