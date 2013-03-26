@@ -14,7 +14,7 @@ install:
 	mkdir -p $(LOCALBINDIR)
 	mkdir -p $(SHAREDIR)
 	mkdir -p $(WORKDIR)
-	cp -r picam $(LIBDIR)/
+	cp -r picam/* $(LIBDIR)/
 	cp picam.py $(BINDIR)/picam
 	cp init.d/picam $(INITDIR)/picam
 	chmod 755 $(INITDIR)/picam

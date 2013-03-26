@@ -3,10 +3,12 @@ set -e
 case "$1" in
     configure)
     ln -s /usr/share/pyshared/picam /usr/lib/python2.7/dist-packages/
+    update-rc.d -f picam defaults
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
     rm -f /usr/lib/python2.7/dist-packages/picam
+    update-rc.d -f picam remove
     ;;
 
     *)

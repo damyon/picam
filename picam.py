@@ -2,8 +2,9 @@
 
 from bottle import get, post, put, route, run, static_file, request
 import simplejson as json
-import gphoto2
-import settings
+import picam.gphoto2 as gphoto2
+import picam.settings as settings
+import os
 
 static_root = '/usr/share/picam/'
 var_root = '/var/lib/picam/'
@@ -127,5 +128,13 @@ def js(path):
 @route('/image/<path:path>')
 def image(path):
     return static_file(path, root=(static_root + 'image'))
+
+# First write pid file
+pid = str(os.getpid())
+f = open('/var/run/picam.pid', 'w')
+f.write(pid)
+f.close()
+
+# Then start the server
 
 run(host='0.0.0.0', port=8080)
