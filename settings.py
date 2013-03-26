@@ -7,7 +7,7 @@ class SettingOptions():
     """
 
     def list(self):
-        filepath = 'settings'
+        filepath = '/var/lib/picam/settings'
         settings = []
         try: 
             for filename in os.listdir(filepath):
@@ -16,16 +16,16 @@ class SettingOptions():
                 f.close()
                 setting = json.loads(settingstr)
                 settings.append(setting)
-        except OSError:
+        except IOError:
             pass
 
         return settings
 
     def get(self, settingname):
-        path = 'settings/' + settingname
+        path = '/var/lib/picam/settings/' + settingname
 
         try:
-            f = open(filepath + '/' + filename, 'r')
+            f = open(path, 'r')
             settingstr = f.read()
             f.close()
         except IOError:
@@ -34,10 +34,10 @@ class SettingOptions():
         return setting
 
     def set(self, setting):
-        path = 'settings/' + setting['path']
+        path = '/var/lib/picam/settings/' + setting['path']
 
         try:
-            os.makedirs('settings');
+            os.makedirs('/var/lib/picam/settings');
         except OSError:
             pass
         

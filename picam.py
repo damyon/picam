@@ -5,6 +5,9 @@ import simplejson as json
 import gphoto2
 import settings
 
+static_root = '/usr/share/picam/'
+var_root = '/var/lib/picam/'
+
 @get('/rest/cameras')
 def list_cameras():
     g = gphoto2.GPhoto2()   
@@ -29,7 +32,7 @@ def get_jpeg(path):
     result = g.getJpeg(path)
 
     if result:
-        return static_file(result, root='cache/jpegs')
+        return static_file(result, root=(var_root + 'cache/jpegs'))
     else:
         return json.dumps(result, indent=4)
 
@@ -40,7 +43,7 @@ def get_thumbnail(path):
     result = g.getThumbnail(path)
 
     if result:
-        return static_file(result, root='cache/thumbs')
+        return static_file(result, root=(var_root + 'cache/thumbs'))
     else:
         return json.dumps(result, indent=4)
 
@@ -111,18 +114,18 @@ def get_camera_setting(path):
 
 @route('/')
 def default():
-    return static_file('index.html', root='html')
+    return static_file('index.html', root=(static_root + 'html'))
 
 @route('/css/<path:path>')
 def css(path):
-    return static_file(path, root='css')
+    return static_file(path, root=(static_root + 'css'))
 
 @route('/js/<path:path>')
 def js(path):
-    return static_file(path, root='js')
+    return static_file(path, root=(static_root + 'js'))
 
 @route('/image/<path:path>')
 def image(path):
-    return static_file(path, root='image')
+    return static_file(path, root=(static_root + 'image'))
 
 run(host='0.0.0.0', port=8080)

@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+dev=`/usr/bin/gphoto2 --auto-detect | grep usb | cut -b 36-42 | sed 's/,/\//'`
+if [ -z ${dev} ]
+then
+ echo "Error: Camera not found"
+ exit
+fi
+usbreset /dev/bus/usb/${dev}
+/usr/bin/gphoto2 $@
+usbreset /dev/bus/usb/${dev}

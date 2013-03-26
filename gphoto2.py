@@ -43,7 +43,7 @@ class GPhoto2():
         return result
 
     def getSettingFromCache(self, path):
-        filepath = 'cache/settings/' + path.replace('/', '_')
+        filepath = '/var/lib/picam/cache/settings/' + path.replace('/', '_')
 
         try:
             f = open(filepath, 'r')
@@ -56,10 +56,10 @@ class GPhoto2():
 
     def cacheSetting(self, setting):
         path = setting['path']
-        filepath = 'cache/settings/' + path.replace('/', '_')
+        filepath = '/var/lib/picam/cache/settings/' + path.replace('/', '_')
 
         try:
-            os.makedirs('cache/settings')
+            os.makedirs('/var/lib/picam/cache/settings')
         except OSError as e:
             pass
 
@@ -134,17 +134,17 @@ class GPhoto2():
     def getThumbnail(self, path):
         imagename = path.split('/')[-1].split('.')[0] + '.jpg'
 
-        cachepath = 'cache/thumbs/' + imagename
+        cachepath = '/var/lib/picam/cache/thumbs/' + imagename
 
         if os.path.isfile(cachepath):
             return imagename
 
         try:
-            os.makedirs('cache/thumbs')
+            os.makedirs('/var/lib/picam/cache/thumbs')
         except OSError as e:
             pass
 
-        output = subprocess.check_output(["gphoto2", "--get-all-thumbnails", "--filename=cache/thumbs/%f.jpg"])
+        output = subprocess.check_output(["gphoto2", "--get-all-thumbnails", "--filename=/var/lib/picam/cache/thumbs/%f.jpg"])
 
         if os.path.isfile(cachepath):
             return imagename
@@ -166,22 +166,22 @@ class GPhoto2():
                 fileindex = i+1
                 rawimagename = files[i]['Filename']
 
-        cachepath = 'cache/jpegs/' + rawimagename
+        cachepath = '/var/lib/picam/cache/jpegs/' + rawimagename
 
         if os.path.isfile(cachepath):
             if '.jpg' in rawimagename.lower():
                 return rawimagename
             else:
                 jpgimagename = rawimagename + '.jpg'
-                if os.path.isfile('cache/jpegs/' + jpgimagename):
+                if os.path.isfile('/var/lib/picam/cache/jpegs/' + jpgimagename):
                     return jpgimagename
 
         try:
-            os.makedirs('cache/jpegs')
+            os.makedirs('/var/lib/picam/cache/jpegs')
         except OSError as e:
             pass
 
-        output = subprocess.check_output(["gphoto2", "--get-file", str(fileindex), "--filename=cache/jpegs/" + rawimagename])
+        output = subprocess.check_output(["gphoto2", "--get-file", str(fileindex), "--filename=/var/lib/picam/cache/jpegs/" + rawimagename])
 
         if not os.path.isfile(cachepath):
             print('File not downloaded')
@@ -194,9 +194,9 @@ class GPhoto2():
         # Need a conversion to jpeg
         jpgimagename = rawimagename + '.jpg'
 
-        output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=cache/jpegs/' + jpgimagename, 'cache/jpegs/' + rawimagename])
+        output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=/var/lib/picam/cache/jpegs/' + jpgimagename, '/var/lib/picam/cache/jpegs/' + rawimagename])
 
-        if os.path.isfile('cache/jpegs/' + jpgimagename):
+        if os.path.isfile('/var/lib/picam/cache/jpegs/' + jpgimagename):
             return jpgimagename
 
         print('jpg not created')
