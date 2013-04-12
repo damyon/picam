@@ -2,7 +2,6 @@
 set -e
 case "$1" in
     remove)
-    rm -f /usr/lib/python2.7/dist-packages/picam
     update-rc.d -f picam remove
     ;;
 

@@ -2,9 +2,10 @@ Source: picam
 Section: python
 Priority: extra
 Maintainer: Damyon Wiese <damyon.wiese@gmail.com>
-Build-Depends: debhelper (>= 7), python-support
+Build-Depends: debhelper (>= 7), python-all
 Standards-Version: 3.8.0
 Homepage: http://www.github.com/damyon/picam
+X-Python-Version: >= 2.7
 
 Package: picam
 Architecture: all

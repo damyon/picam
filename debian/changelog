@@ -1,3 +1,8 @@
+picam (0.1.20130412) UNRELEASED; urgency=low
+
+  * Bumped version and updates to installer.
+
+ --  <damyon.wiese@gmail.com>  Fri, 12 Apr 2013 15:00:57 +0000
 picam (0.1.20130325) UNRELEASED; urgency=low
 
   * Initial release.
