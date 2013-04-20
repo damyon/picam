@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+
+# This one is to break any current communication with the camera
+bleh=`/usr/bin/gphoto2 --auto-detect`
 dev=`/usr/bin/gphoto2 --auto-detect | grep usb | cut -b 36-42 | sed 's/,/\//'`
 if [ -z ${dev} ]
 then

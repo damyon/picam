@@ -1,6 +1,8 @@
 import subprocess
 import os
+import re
 import simplejson as json
+import glob
 
 class GPhoto2():
     """This is a wrapper class for gphoto2 functions that call gphoto2 in a shell.
@@ -79,6 +81,7 @@ class GPhoto2():
             return setting
         setting = { 'path' : path }
         path = path.replace('_', '/')
+        print("gphoto2 --get-config " + path)
         output = subprocess.check_output(["gphoto2", "--get-config", path])
 
         for line in output.split('\n')[:-1]:
@@ -203,7 +206,94 @@ class GPhoto2():
         return False
         
     def takePhoto(self):
-        output = subprocess.check_output(["gphoto2", "--capture-image"])
+        # Save a copy to cameras sd card so we can download it
+        output = subprocess.check_output(["gphoto2", "--set-config", "capturetarget=1"])
 
+        output = subprocess.check_output(["gphoto2", "--capture-image"])
+        # Output will contain: New file is in location /store_00010001/capt0000.nef on the camera
         print(output)
+
+        if not 'on the camera' in output:
+            return False
+
+        # Get the file name from the output
+
+        output = re.sub('.*in location', '', output)
+        output = re.sub('on the camera.*', '', output)
+        output = re.sub('.*/', '', output)
+
+        newimagefile = output.strip().lower()
+
+        # now call list files to get the number of the file to pass to get-file
+        output = subprocess.check_output("gphoto2 --list-files|grep -i " + newimagefile, shell=True)
+        print(output)
+
+        output = re.sub('#', '', output)
+        output = re.sub(' .*', '', output)
+
+        imagenumber = output
+
+        output = subprocess.check_output(["gphoto2", "--get-file", imagenumber, "--filename", "/var/lib/picam/cache/" + newimagefile])
+        print(output)
+
+        if not '.jpg' in newimagefile:
+            output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=/var/lib/picam/cache/' + newimagefile + '.jpg', '/var/lib/picam/cache/' + newimagefile])
+
+            try:
+                os.remove('/var/lib/picam/cache/' + newimagefile)
+            except OSError:
+                pass
+
+            newimagefile = newimagefile + '.jpg'
+
+        try:
+            os.remove('/var/lib/picam/cache/preview.jpg')
+            os.rename('/var/lib/picam/cache/' + newimagefile, '/var/lib/picam/cache/preview.jpg')
+        except OSError:
+            pass
+
         return True
+
+    def takePreview(self):
+        previewfile = "/var/lib/picam/cache/preview.jpg"
+        try:
+            os.remove(previewfile)
+        except OSError:
+            pass
+        
+        output = subprocess.check_output(["gphoto2", "--capture-preview", "--stdout", ])
+
+        return True
+
+    def startPreviews(self):
+
+        files = glob.glob('/var/lib/picam/preview/*.jpg')
+
+        for previewfile in files:
+            try:
+                os.remove(previewfile)
+            except OSError:
+                pass
+
+        # Now start the gphoto -> avconv pipe
+        shellcommand = 'gphoto2 --capture-movie --stdout | avconv -f mjpeg -timelimit 60 -i pipe:0 -vsync 1 -r 1 /var/lib/picam/preview/preview%02d.jpg'
+        print(shellcommand)
+        output = subprocess.Popen(shellcommand, shell=True)
+
+        return True
+
+    def getLastPreview(self):
+        files = glob.glob('/var/lib/picam/preview/*.jpg')
+
+        files.sort()
+
+        last = False
+
+        if (files):
+            last = files.pop()
+
+            return os.path.basename(last)
+        return last
+
+
+    

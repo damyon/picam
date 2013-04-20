@@ -1,0 +1,69 @@
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #444;
+    color: #aaa;
+}
+
+h1 {
+    color: white;
+    background-image: url('/image/logo.png');
+    background-repeat: no-repeat;
+    padding-left: 70px;
+    padding-top: 4px;
+    height: 26px;
+}
+
+#preview-region .content-region {
+    background-color: black;
+    border: 2px solid #666;
+}
+
+#settings-region #controls li {
+    list-style: none;
+    text-align: center;
+    display: block;
+    padding: 0.5em;
+}
+
+#settings-region #settings li {
+    list-style: none;
+    display: block;
+    padding: 0.5em;
+}
+#settings-region select {
+    width: 150px;
+}
+#settings-region #settings label {
+    display: block;
+}
+
+fieldset {
+    border: 1px solid #666;
+    border-radius: 4px;
+    margin-bottom: 1em;
+}
+
+
+@media all and (min-width: 700px) {
+    h1 {
+        float: left;
+    }
+    #camera-info {
+        float: right;
+        height: 26px;
+        padding-top: 4px;
+        padding-right: 10px;
+    }
+    #preview-region {
+        float: left;
+    }
+    #settings-region {
+        width: 170px;
+        float: right;
+        margin-right: 10px;
+    }
+}
+
+@media all and (max-width: 699px) {
+
+}

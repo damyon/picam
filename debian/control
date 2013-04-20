@@ -9,6 +9,6 @@ X-Python-Version: >= 2.7
 
 Package: picam
 Architecture: all
-Depends: gphoto2 (>= 2.4.14-1), ufraw-batch (>= 0.18-2), python2.7 (>= 2.7.3-6), python-simplejson (>=2.5.2-1), python-bottle (>= 0.10.11-1)
+Depends: gphoto2 (>= 2.4.14-1), ufraw-batch (>= 0.18-2), python2.7 (>= 2.7.3-6), python-simplejson (>=2.5.2-1), python-bottle (>= 0.10.11-1), ffmpeg (>= 6:0.8.6-1~)
 Description: Python USB camera control web interface
 

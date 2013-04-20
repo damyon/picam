@@ -17,6 +17,30 @@ def list_cameras():
 
     return json.dumps(result, indent=4)
 
+@post('/rest/preview')
+@put('/rest/preview')
+def start_previews():
+    g = gphoto2.GPhoto2() 
+
+    result = g.startPreviews()
+
+    return json.dumps(result, indent=4)
+
+@get('/rest/photos')
+def get_last_photo():
+    return static_file('preview.jpg', root=(var_root + 'cache'))
+
+@get('/rest/preview')
+def get_last_preview():
+    g = gphoto2.GPhoto2() 
+
+    preview = g.getLastPreview()
+
+    if (preview):
+        return static_file(preview, root=(var_root + 'preview'))
+    return False
+
+
 @post('/rest/photos')
 @put('/rest/photos')
 def take_photo():
@@ -128,6 +152,10 @@ def js(path):
 @route('/image/<path:path>')
 def image(path):
     return static_file(path, root=(static_root + 'image'))
+
+@route('/picam.html')
+def html():
+    return static_file('picam.html', root=(static_root + 'html'))
 
 # First write pid file
 pid = str(os.getpid())
