@@ -237,7 +237,9 @@ class GPhoto2():
         print(output)
 
         if not '.jpg' in newimagefile:
-            output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=/var/lib/picam/cache/' + newimagefile + '.jpg', '/var/lib/picam/cache/' + newimagefile])
+            # output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=1000x750', '--output=/var/lib/picam/cache/' + newimagefile + '.jpg', '/var/lib/picam/cache/' + newimagefile])
+            output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--size=860x645', '--output=/var/lib/picam/cache/' + newimagefile + '.jpg', '/var/lib/picam/cache/' + newimagefile])
+            # output = subprocess.check_output(["ufraw-batch", "--out-type=jpg", '--overwrite', '--output=/var/lib/picam/cache/' + newimagefile + '.jpg', '/var/lib/picam/cache/' + newimagefile])
 
             try:
                 os.remove('/var/lib/picam/cache/' + newimagefile)
@@ -267,6 +269,10 @@ class GPhoto2():
 
     def startPreviews(self):
 
+        if not os.path.isfile('/var/lib/picam/preview'):
+            output = subprocess.check_output(["/bin/ln", "-s", '/dev/shm/picam', '/var/lib/picam/preview'])
+            
+
         files = glob.glob('/var/lib/picam/preview/*.jpg')
 
         for previewfile in files:
@@ -283,6 +289,9 @@ class GPhoto2():
         return True
 
     def getLastPreview(self):
+        if not os.path.isfile('/var/lib/picam/preview'):
+            output = subprocess.check_output(["/bin/ln", "-s", '/dev/shm/picam', '/var/lib/picam/preview'])
+            
         files = glob.glob('/var/lib/picam/preview/*.jpg')
 
         files.sort()

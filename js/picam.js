@@ -40,14 +40,32 @@
             $('#capture').button().on('click', methods.takePhoto);
         },
 
+        lockAllSettings : function() {
+            $('#setting-iso-speed').attr('disabled', true).trigger('liszt:updated');
+            $('#setting-shutter-speed').attr('disabled', true).trigger('liszt:updated');
+            $('#setting-f-number').attr('disabled', true).trigger('liszt:updated');
+            $('#capture').attr('disabled', true);
+            $('#capture-preview').attr('disabled', true);
+        },
+        
+        unlockAllSettings : function() {
+            $('#setting-iso-speed').attr('disabled', false).trigger('liszt:updated');
+            $('#setting-shutter-speed').attr('disabled', false).trigger('liszt:updated');
+            $('#setting-f-number').attr('disabled', false).trigger('liszt:updated');
+            $('#capture').attr('disabled', false);
+            $('#capture-preview').attr('disabled', false);
+        },
+
         takePhoto : function(event) {
             event.preventDefault();
+            methods.lockAllSettings();
             var request = $.ajax( {
                 type: 'POST',
                 dataType:  'json',
                 url: '/rest/photos',
             });
             request.done(function(response) {
+                methods.unlockAllSettings();
                 $('body').trigger('photoTaken'); 
             });
         },
