@@ -1,3 +1,9 @@
+picam (0.1.20130421) UNRELEASED; urgency=low
+
+  * New UI available at /picam.html - simple UI for shooting and quick
+    settings changes. Supports liveview (a form of it).
+
+ --  <damyon.wiese@gmail.com>  Fri, 12 Apr 2013 15:00:57 +0000
 picam (0.1.20130412) UNRELEASED; urgency=low
 
   * Bumped version and updates to installer.
