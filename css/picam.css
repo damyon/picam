@@ -32,6 +32,8 @@ h1 {
 }
 #settings-region select {
     width: 150px;
+    font-size: 20pt;
+    font-family: 'Roboto Condensed', sans-serif;
 }
 #settings-region #settings label {
     display: block;
@@ -43,8 +45,12 @@ fieldset {
     margin-bottom: 1em;
 }
 
+#camera-info {
+    cursor: pointer;
+}
 
-@media all and (min-width: 700px) {
+
+@media all and (min-width: 900px) {
     h1 {
         float: left;
     }
@@ -64,6 +70,6 @@ fieldset {
     }
 }
 
-@media all and (max-width: 699px) {
+@media all and (max-width: 899px) {
 
 }

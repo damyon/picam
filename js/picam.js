@@ -6,7 +6,10 @@
 
             if (!data) {
                 // Attach an empty data node to the body tag.
-                $('body').data('picam', { });
+                
+                var data = $('body').data('picam', { });
+                data.loadingImage = new Image();
+                data.loadingImage.src = '/image/ajax-loader.gif';
                 $('body').picam('setupListeners');
                 $('body').picam('loadCameraInfo');
                 $('body').picam('layoutPreview');
@@ -17,7 +20,7 @@
         },
         
         layoutPreview : function() {
-            if ($('body').width() >= 700) {
+            if ($('body').width() >= 900) {
                 var width = $('body').width() - 200;
                 var height = (width / 4) * 3;
                 $('#preview-region .content-region').width(width);
@@ -41,17 +44,19 @@
         },
 
         lockAllSettings : function() {
-            $('#setting-iso-speed').attr('disabled', true).trigger('liszt:updated');
-            $('#setting-shutter-speed').attr('disabled', true).trigger('liszt:updated');
-            $('#setting-f-number').attr('disabled', true).trigger('liszt:updated');
+            $('#setting-iso-speed').attr('disabled', true);
+            $('#setting-shutter-speed').attr('disabled', true);
+            $('#setting-f-number').attr('disabled', true);
+            $('#setting-focus-area').attr('disabled', true);
             $('#capture').attr('disabled', true);
             $('#capture-preview').attr('disabled', true);
         },
         
         unlockAllSettings : function() {
-            $('#setting-iso-speed').attr('disabled', false).trigger('liszt:updated');
-            $('#setting-shutter-speed').attr('disabled', false).trigger('liszt:updated');
-            $('#setting-f-number').attr('disabled', false).trigger('liszt:updated');
+            $('#setting-iso-speed').attr('disabled', false);
+            $('#setting-shutter-speed').attr('disabled', false);
+            $('#setting-f-number').attr('disabled', false);
+            $('#setting-focus-area').attr('disabled', false);
             $('#capture').attr('disabled', false);
             $('#capture-preview').attr('disabled', false);
         },
@@ -59,12 +64,16 @@
         takePhoto : function(event) {
             event.preventDefault();
             methods.lockAllSettings();
+
+            $('#preview-region .content-region img').attr('src', '/image/ajax-loader.gif');
+
             var request = $.ajax( {
                 type: 'POST',
                 dataType:  'json',
                 url: '/rest/photos',
             });
             request.done(function(response) {
+                $('#preview-region .content-region img').attr('src', '');
                 methods.unlockAllSettings();
                 $('body').trigger('photoTaken'); 
             });
@@ -98,9 +107,9 @@
 
             data.previewSecondsLeft = 60;
             
-            $('#setting-iso-speed').attr('disabled', true).trigger('liszt:updated');
-            $('#setting-shutter-speed').attr('disabled', true).trigger('liszt:updated');
-            $('#setting-f-number').attr('disabled', true).trigger('liszt:updated');
+            $('#setting-iso-speed').attr('disabled', true);
+            $('#setting-shutter-speed').attr('disabled', true);
+            $('#setting-f-number').attr('disabled', true);
             $('#capture').attr('disabled', true);
             $('#capture-preview span').text('Stop Preview');
             $('body').trigger('previewUpdated');
@@ -110,9 +119,9 @@
             var data = $('body').data('picam');
 
             data.previewSecondsLeft = 0;
-            $('#setting-iso-speed').attr('disabled', false).trigger('liszt:updated');
-            $('#setting-shutter-speed').attr('disabled', false).trigger('liszt:updated');
-            $('#setting-f-number').attr('disabled', false).trigger('liszt:updated');
+            $('#setting-iso-speed').attr('disabled', false);
+            $('#setting-shutter-speed').attr('disabled', false);
+            $('#setting-f-number').attr('disabled', false);
             $('#capture').attr('disabled', false);
             $('#capture-preview span').text('Preview');
 
@@ -136,7 +145,6 @@
             }
         },
 
-        
         loadCameraInfo : function() {
             var request = $.ajax( {
                 type: 'GET',
@@ -174,16 +182,13 @@
                 methods.loadSelectSetting($('#setting-shutter-speed').attr('data-setting-path'));
                 methods.loadSelectSetting($('#setting-iso-speed').attr('data-setting-path'));
                 methods.loadSelectSetting($('#setting-f-number').attr('data-setting-path'));
-            } else {
-                $('#setting-shutter-speed').chosen();
-                $('#setting-iso-speed').chosen();
-                $('#setting-f-number').chosen();
+                methods.loadSelectSetting($('#setting-focus-area').attr('data-setting-path'));
             }
 
             return this;
         },
 
-        setSelectOptionsFromSetting : function(select, setting, chosen) {
+        setSelectOptionsFromSetting : function(select, setting, setup) {
             var data = $('body').data('picam');
 
             console.log(select, setting);
@@ -197,12 +202,9 @@
                     select.append($('<option value="' + keyval[0] + '" ' + selected + '>' + keyval[1] + '</option>'));
                 });
             }
-            if (chosen) {
-                // just tell chosen to update the list of options
-                select.trigger("liszt:updated");
-            } else {
-                // not been chosen() yet.
-                select.chosen().on('change', methods.changeSetting);
+            if (!setup) {
+                // not been setup yet.
+                select.on('change', methods.changeSetting);
             }
         },
 
@@ -239,39 +241,53 @@
             if (datasettingpath == $('#setting-f-number').attr('data-setting-path')) {
                 methods.setupFNumberSelect();
             }
+            if (datasettingpath == $('#setting-focus-area').attr('data-setting-path')) {
+                methods.setupFocusAreaSelect();
+            }
         },
 
         setupShutterSpeedSelect : function() {
             var data = $('body').data('picam');
-            var chosen = (data.settingShutterSpeedChosen !== undefined);
+            var setup = (data.settingShutterSpeedSetup !== undefined);
             var select = $('#setting-shutter-speed');
             var path = select.attr('data-setting-path');
             methods.setSelectOptionsFromSetting(select,
                                                 data[path],
-                                                chosen);
-            data.settingShutterSpeedChosen = true;
+                                                setup);
+            data.settingShutterSpeedSetup = true;
         },
         
         setupFNumberSelect : function() {
             var data = $('body').data('picam');
-            var chosen = (data.settingFNumberChosen !== undefined);
+            var setup = (data.settingFNumberSetup !== undefined);
             var select = $('#setting-f-number');
             var path = select.attr('data-setting-path');
             methods.setSelectOptionsFromSetting(select,
                                                 data[path],
-                                                chosen);
-            data.settingFNumberChosen = true;
+                                                setup);
+            data.settingFNumberSetup = true;
+        },
+        
+        setupFocusAreaSelect : function() {
+            var data = $('body').data('picam');
+            var setup = (data.settingFocusAreaSetup !== undefined);
+            var select = $('#setting-focus-area');
+            var path = select.attr('data-setting-path');
+            methods.setSelectOptionsFromSetting(select,
+                                                data[path],
+                                                setup);
+            data.settingFocusAreaSetup = true;
         },
         
         setupISOSpeedSelect : function() {
             var data = $('body').data('picam');
-            var chosen = (data.settingISOSpeedChosen !== undefined);
+            var setup = (data.settingISOSpeedSetup !== undefined);
             var select = $('#setting-iso-speed');
             var path = select.attr('data-setting-path');
             methods.setSelectOptionsFromSetting(select,
                                                 data[path],
-                                                chosen);
-            data.settingISOSpeedChosen = true;
+                                                setup);
+            data.settingISOSpeedSetup = true;
         },
 
         displayCameraInfo : function() {
@@ -282,6 +298,7 @@
             } else {
                 $('#camera-info .content-region').html('No camera connected');
             }
+            $('#camera-info .content-region').on('click', methods.loadCameraInfo);
         }
     };
 

@@ -3,29 +3,62 @@
     <head>
         <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto+Condensed" />
         <link type="text/css" rel="stylesheet" href="/css/reset.css" />
-        <link type="text/css" rel="stylesheet" href="/css/jquery-ui-1.10.0.custom.min.css" />
-        <link type="text/css" rel="stylesheet" href="/css/core.css" />
+        <link type="text/css" rel="stylesheet" href="/css/jquery-ui.min.css" />
+        <link type="text/css" rel="stylesheet" href="/css/picam.css" />
         <script type="text/javascript" src="/js/jquery.min.js"></script>
-        <script type="text/javascript" src="/js/jquery-ui-1.10.0.custom.min.js"></script>
-        <script type="text/javascript" src="/js/loading.js"></script>
-        <script type="text/javascript" src="/js/settings.js"></script>
-        <script type="text/javascript" src="/js/shoot.js"></script>
-        <script type="text/javascript" src="/js/browse.js"></script>
-        <script type="text/javascript" src="/js/core.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/js/picam.js"></script>
     </head>
     <body>
-        <h1>PiCam!</h1>
+        <h1>picam</h1>
         <section id="camera-info">
-        <div class="content-region"/>
+            <div class="content-region"/>
         </section>
-        <section id="app-chooser">
-        <div class="content-region"/>
+        <section id="preview-region">
+            <div class="content-region">
+                <img src="/rest/preview?1" width="100%" height="100%"/>
+            </div>
         </section>
-        <section id="app-content">
-        <div class="content-region"/>
+        <section id="settings-region">
+            <div class="content-region">
+                <form id="settings-form">
+                    <fieldset id="controls">
+                        <legend>Controls</legend>
+                        <ul>
+                            <li><button id="capture-preview">Preview</button></li>
+                            <li><button id="capture">Take Photo</button></li>
+                        </ul>
+                    </fieldset>
+                    <fieldset id="settings">
+                        <legend>Settings</legend>
+                        <ul>
+                            <li>
+                                <label for="setting-shutter-speed">Shutter speed</label>
+                                <select id="setting-shutter-speed" data-setting-path="_main_capturesettings_shutterspeed">
+                                </select>
+                            </li>
+                            <li>
+                                <label for="setting-f-number">F-number</label>
+                                <select id="setting-f-number" data-setting-path="_main_capturesettings_f-number">
+                                </select>
+                            </li>
+                            <li>
+                                <label for="setting-iso-speed">ISO speed</label>
+                                <select id="setting-iso-speed" data-setting-path="_main_imgsettings_iso">
+                                </select>
+                            </li>
+                            <li>
+                                <label for="setting-focus-area">Focus Area</label>
+                                <select id="setting-focus-area" data-setting-path="_main_capturesettings_autofocusarea">
+                                </select>
+                            </li>
+                        </ul>
+                    </fieldset>
+                </form>
+            </div>
         </section>
         <script type="text/javascript">
-            $('#camera-info').core();
+            $('body').picam();
         </script>
     </body>
 </html>

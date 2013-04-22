@@ -269,7 +269,7 @@ class GPhoto2():
 
     def startPreviews(self):
 
-        if not os.path.isfile('/var/lib/picam/preview'):
+        if not os.path.exists('/var/lib/picam/preview'):
             output = subprocess.check_output(["/bin/ln", "-s", '/dev/shm/picam', '/var/lib/picam/preview'])
             
 
@@ -289,7 +289,7 @@ class GPhoto2():
         return True
 
     def getLastPreview(self):
-        if not os.path.isfile('/var/lib/picam/preview'):
+        if not os.path.exists('/var/lib/picam/preview'):
             output = subprocess.check_output(["/bin/ln", "-s", '/dev/shm/picam', '/var/lib/picam/preview'])
             
         files = glob.glob('/var/lib/picam/preview/*.jpg')

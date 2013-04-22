@@ -153,10 +153,6 @@ def js(path):
 def image(path):
     return static_file(path, root=(static_root + 'image'))
 
-@route('/picam.html')
-def html():
-    return static_file('picam.html', root=(static_root + 'html'))
-
 # First write pid file
 pid = str(os.getpid())
 f = open('/var/run/picam.pid', 'w')
@@ -165,4 +161,4 @@ f.close()
 
 # Then start the server
 
-run(host='0.0.0.0', port=8080)
+run(host='0.0.0.0', port=80)

@@ -10,9 +10,9 @@ This will install the package, then fix any missing dependencies and when
 all the dependencies are installed it will configure the package.
 
 Once installed, picam should run at startup - reboot and you should be able
-to connect to the webserver running on port 8080.
+to connect to the webserver running on port 80.
 
-e.g. http://<mypiaddress>:8080/
+e.g. http://<mypiaddress>/
 
 This install uses some room on the sdcard for cache, you can clear it with
 
